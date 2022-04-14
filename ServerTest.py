@@ -1,5 +1,21 @@
-import paramiko, glob
+import paramiko, os
 from stat import S_ISDIR
+
+def convert_bytes(size, unit=None):
+    if unit == "KB":
+        return 'File size: ' + str(round(size / 1024, 3)) + ' Kilobytes'
+    elif unit == "MB":
+        return 'File size: ' + str(round(size / (1024 * 1024), 3)) + ' Megabytes'
+    elif unit == "GB":
+        return 'File size: ' + str(round(size / (1024 * 1024 * 1024), 3)) + ' Gigabytes'
+    else:
+        return 'File size: ' + str(size) + ' bytes'
+
+def sftpwalk(remotepath,sftp):
+    for f in sftp.listdir_iter(remotepath):
+            info = f.st_size
+            print(f.filename, " ->>> ", convert_bytes(info))
+        #sftpwalk(dl + f.filename + "/")
 
 host="3.109.121.57"
 username="Administrator"
@@ -12,22 +28,6 @@ client.connect(host, 22, username=username, password=password)
 print("connected")
 sftp = client.open_sftp()
 
-def sftpwalk(dl):
-    remotepath = dl
-    files = []
-    folders = []
-    for f in sftp.listdir_attr(remotepath):
-        if S_ISDIR(f.st_mode):
-            folders.append(f.filename)
-            # print(dl+f.filename)
-            sftpwalk(dl + f.filename + "/")
-        else:
-            # if
-            files.append(f.filename)
-    # print (path,folders,files)
-    print(remotepath, folders, files)
-
-
-dl = 'C://Users/Administrator/Desktop/'
-sftpwalk(dl)
-client.close
+dl = 'C://Users/Administrator/'
+sftpwalk(dl,sftp)
+client.close()
